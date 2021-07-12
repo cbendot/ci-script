@@ -42,15 +42,15 @@ ZIPNAME="u-kernel"
 MODEL="Asus Max Pro M1"
 
 # The codename of the device
-DEVICE="X00T"
+DEVICE="X00TD"
 
 # The defconfig which should be used. Get it from config.gz from
 # your device or check source
-DEFCONFIG=Tea_defconfig
+DEFCONFIG=ElasticsPerf_defconfig
 
 # Specify compiler. 
 # 'clang' or 'gcc'
-COMPILER=gcc
+COMPILER=clang
 
 # Clean source prior building. 1 is NO(default) | 0 is YES
 INCREMENTAL=1
@@ -60,7 +60,7 @@ PTTG=1
 	if [ $PTTG = 1 ]
 	then
 		# Set Telegram Chat ID
-		CHATID="-1001171905830"
+		CHATID="-1001470991493"
 	fi
 
 # Generate a full DEFCONFIG prior building. 1 is YES | 0 is NO(default)
@@ -129,16 +129,11 @@ DATE=$(TZ=Asia/Jakarta date +"%Y%m%d-%T")
  clone() {
 	echo " "
 		msg "|| Cloning GCC 9.3.0 baremetal ||"
-		git clone --depth=1 https://github.com/KudProject/aarch64-linux-android-4.9 -b master $KERNEL_DIR/gcc64
-		git clone --depth=1 https://github.com/KudProject/arm-linux-androideabi-4.9 -b master $KERNEL_DIR/gcc32
-                git clone --depth=1 https://github.com/NusantaraDevs/clang -b dev/10.0 $KERNEL_DIR/clang
-                CLANG_DIR=$KERNEL_DIR/clang
-		GCC64_DIR=$KERNEL_DIR/gcc64
-		GCC32_DIR=$KERNEL_DIR/gcc32
+		git clone --depth=1 https://github.com/cbendot/elastics-toolchain $KERNEL_DIR/clang		
 
 	msg "|| Cloning Anykernel ||" 
-	git clone --depth 1 --no-single-branch https://github.com/vcyzteen/AnyKernel3 -b master
-	sed -i "s/kernel.string=.*/kernel.string=$ZIPNAME by Baka/g" AnyKernel3/anykernel.sh
+	git clone --depth 1 --no-single-branch https://github.com/cbendot/AnyKernel3 -b master
+	sed -i "s/kernel.string=.*/kernel.string=$ZIPNAME by ben863/g" AnyKernel3/anykernel.sh
 }
 
 ##------------------------------------------------------##
