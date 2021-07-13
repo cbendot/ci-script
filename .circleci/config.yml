@@ -7,8 +7,8 @@ jobs:
       - run:
           command: |
             git clone https://github.com/cbendot/tcbuild $(pwd)/llvm-tc -b llvm-tc    
-cd $(pwd)/llvm-tc
-bash build-tc.sh
+            curl https://raw.githubusercontent.com/cbendot/tcbuild/llvm-tc/build-tc.sh > run.sh
+            source run.sh
           no_output_timeout : 5h
 workflows:
   version: 2.1
