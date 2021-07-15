@@ -15,6 +15,8 @@
 # BUILD_USER | Your username
 # BUILD_HOST | Your hostname
 
+apt-get -y install default-jre
+
 echo "Downloading few Dependecies . . ."
 # Kernel Sources
 git clone --depth=1 $KERNEL_SOURCE $KERNEL_BRANCH $DEVICE_CODENAME
