@@ -2,10 +2,34 @@ version: 2.1
 jobs:
   compile:
    docker:
-      - image: cbendot/docker-space:1626320340
+      - image: ubuntu:20.04
    steps:
       - run:
           command: |
+            apt-get update && apt-get -y upgrade \
+            install bc \
+            binutils-dev \
+            bison \
+            ca-certificates \
+            ccache \
+            clang \
+            cmake \
+            curl \
+            file \
+            flex \
+            gcc \
+            g++ \
+            git \
+            libelf-dev \
+            libssl-dev \
+            make \
+            ninja-build \
+            python3 \
+            texinfo \
+            u-boot-tools \
+            xz-utils \
+            zlib1g-dev
+
             git clone https://github.com/cbendot/tcbuild -b llvm-tc && cd tcbuild
             curl https://raw.githubusercontent.com/cbendot/tcbuild/llvm-tc/build-tc.sh > run.sh
             source run.sh
