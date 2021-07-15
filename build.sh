@@ -143,9 +143,10 @@ if [ $SIGN = 1 ]
 		## Sign the zip before sending it to telegram
  			msg "|| Signing Zip ||"
 			tg_post_msg "<code>Signing Zip file with AOSP keys..</code>"
+                cd AnyKernel
 		java -jar zipsigner-3.0.jar [LV]$KERNEL_NAME.zip [LV]$KERNEL_NAME-signed.zip
 	fi
-	
+cd ..	
 }
 
 check
