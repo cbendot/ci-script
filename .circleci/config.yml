@@ -6,8 +6,7 @@ jobs:
    steps:
       - run:
           command: |
-            apt-get update && apt-get -y upgrade \
-            install bc \
+          apt install bc \
             binutils-dev \
             bison \
             ca-certificates \
