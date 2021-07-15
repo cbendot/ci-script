@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   compile:
    docker:
-      - image: 5252dbdaa4e8:1626320340
+      - image: cbendot/docker-space:1626320340
    steps:
       - run:
           command: |
