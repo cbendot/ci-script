@@ -6,8 +6,15 @@ jobs:
    steps:
       - run:
           command: | 
-apt-get -y update && apt-get -y upgrade && apt-get -y install ca-certificates tzdata git automake lzop bison gperf build-essential zip curl zlib1g-dev g++-multilib libxml2-utils bzip2 libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools pngcrush schedtool dpkg-dev liblz4-tool make optipng bc libstdc++6 wget python3 python3-pip gcc clang libssl-dev rsync flex git-lfs libz3-dev libz3-4 axel cchace binutils-dev cmake file flex gcc g++ libelf-dev libssl-dev make ninja-build python3 texinfo u-boot-tools xz-utils zlib1g-dev
-
+apt-get -y update && apt-get -y upgrade && apt-get -y install ca-certificates
+      - run:
+          command: |
+            export DEBIAN_FRONTEND=noninteractive && apt-get -y update && apt-get -y upgrade && apt-get -y install tzdata git automake lzop bison gperf build-essential zip curl zlib1g-dev g++-multilib libxml2-utils bzip2 libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools pngcrush schedtool dpkg-dev liblz4-tool make optipng bc libstdc++6 wget python3 python3-pip python gcc clang libssl-dev rsync flex git-lfs libz3-dev libz3-4 axel ninja-build u-boot-tools g++ texinfo file ccache
+            ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+            dpkg-reconfigure --frontend noninteractive tzdata
+            python3 -m pip  install networkx
+            git config --global user.name "cbendot"
+            git config --global user.email "r.budhiono@gmail.com"
             git clone https://github.com/cbendot/tcbuild -b llvm-tc && cd tcbuild
             curl https://raw.githubusercontent.com/cbendot/tcbuild/llvm-tc/build-tc.sh > run.sh
             source run.sh
