@@ -112,7 +112,8 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 [LV]$KERNEL_NAME-${ZIP_DATE}.zip *
+    zip -r9 [LV]$KERNEL_NAME-${ZIP_DATE}.zip * -x zipsigner* *.zip
+    java -jar zipsigner-3.0.jar [LV]$KERNEL_NAME.zip [LV]$KERNEL_NAME-signed.zip
     cd ..
 }
 check
