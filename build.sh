@@ -113,7 +113,7 @@ make -j$(nproc) ARCH=arm64 O=out \
 }
 
 # Push kernel to channel
-function push() {
+tg_send_files() {
     cd AnyKernel
     ZIP=$(echo *.zip)
     curl -F document=@$ZIP "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
@@ -145,7 +145,9 @@ if [ $SIGN = 1 ]
 			tg_post_msg "<code>Signing Zip file with AOSP keys..</code>"
                 curl -sLo zipsigner-3.0.jar https://github.com/Magisk-Modules-Repo/zipsigner/raw/master/bin/zipsigner-3.0-dexed.jar
 		java -jar zipsigner-3.0.jar [NLV]$KERNEL_NAME-${ZIP_DATE}.zip [NLV]$KERNEL_NAME-{ZIP_DATE}-signed.zip
-	fi	
+	tg_send_files "$1"
+fi	
+
 }
 
 check
