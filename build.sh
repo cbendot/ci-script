@@ -99,20 +99,21 @@ function push() {
         -F "parse_mode=html" \
         -F caption="✅ $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s)"
 }
+
 # Fin Error
 function finerr() {
     curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
         -d chat_id="$TG_CHAT_ID" \
         -d "disable_web_page_preview=true" \
         -d "parse_mode=markdown" \
-        -d text="❌ Build throw an error(s)"
+        -d text="Build throw an error(s)"
     exit 1
 }
 
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 [LV]$KERNEL_NAME-HMP-${ZIP_DATE}.zip *
+    zip -r9 [LV]$KERNEL_NAME-CAF-${ZIP_DATE}.zip *
     cd ..
 
 }
