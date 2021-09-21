@@ -106,14 +106,14 @@ function finerr() {
         -d chat_id="$TG_CHAT_ID" \
         -d "disable_web_page_preview=true" \
         -d "parse_mode=markdown" \
-        -d text="Build throw an error(s)"
+        -d text="❌ Build throw an error(s)"
     exit 1
 }
 
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 [NLV][OC]$KERNEL_NAME-HMP-${ZIP_DATE}.zip *
+    zip -r9 [NLV][OC]$KERNEL_NAME-EAS-${ZIP_DATE}.zip *
     cd ..
 
 }
