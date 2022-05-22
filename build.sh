@@ -44,7 +44,7 @@ builder_commit="$(git rev-parse HEAD)"
 START=$(date +"%s")
 
 # Send a notificaton to TG
-tg_post_msg "<b>Elastics Clang Compilation Started</b>%0A<b>Builder : </b><code>@ben863</code>%0A<b>Server Builder : </b><code>cloud.drone.io</code>%0A<b>Vendor : </b><code>$LLVM_NAME Toolchain</code>%0A<b>Toolchain Script Commit : </b><code>$builder_commit</code>%0A<b>Build Date : </b><code>$rel_friendly_date</code>"       
+tg_post_msg "<b>Elastics Clang Compilation Started</b>%0A<b>Builder : </b><code>@ben863</code>%0A<b>Pipelines : </b><code>app.circleci.com</code>%0A<b>Vendor : </b><code>$LLVM_NAME Toolchain</code>%0A<b>Toolchain Script Commit : </b><code>$builder_commit</code>%0A<b>Build Date : </b><code>$rel_friendly_date</code>"       
 
 # Build LLVM
 msg "Building LLVM..."
@@ -54,8 +54,8 @@ tg_post_msg "<code>Building LLVM...</code>"
 	--defines LLVM_PARALLEL_COMPILE_JOBS=$(nproc) LLVM_PARALLEL_LINK_JOBS=$(nproc) CMAKE_C_FLAGS=-O3 CMAKE_CXX_FLAGS=-O3 \
 	--projects "clang;lld;polly;compiler-rt" \
 	--targets "ARM;AArch64" \
-  --bolt \
 	--shallow-clone \
+	--bolt \
 	--incremental \
 	--build-type "Release" 2>&1 | tee build.log
 
@@ -99,7 +99,7 @@ llvm_commit_url="https://github.com/llvm/llvm-project/commit/$short_llvm_commit"
 binutils_ver="$(ls | grep "^binutils-" | sed "s/binutils-//g")"
 clang_version="$(install/bin/clang --version | head -n1 | cut -d' ' -f4)"
 
-tg_post_msg "<b>Pushed to GitHub :</b> <code>https://$GH_PUSH_REPO_URL</code>%0A<b>Builder : </b><code>@ben863</code>%0A<b>Server Builder : </b><code>cloud.drone.io</code>%0A<b>Vendor : </b><code>Elastics Toolchain</code>%0A<b>Clang Version : </b><code>$clang_version</code>%0A<b>Binutils Version : </b><code>$binutils_ver</code>%0A<b>LLVM Commit: </b><code>$llvm_commit_url</code>%0A<b>Builder Commit: </b><code>https://github.com/cbendot/tcbuild/commit/$builder_commit</code>%0A<b>Toolchain Bump to: </b><code>$rel_date build</code>"    
+tg_post_msg "<code>Pushed to GitHub...</code>"   
 
 # Push to GitHub
 # Update Git repository
@@ -131,4 +131,4 @@ git config --global http.version HTTP/2
 
 END=$(date +"%s")
 DIFF=$(($END - $START))
-tg_post_msg "Toolchain Compilation Finished and pushed%0A%0A<code>https://$GH_PUSH_REPO_URL</code>%0A%0A<code>$((DIFF / 60)) minute(s) $((DIFF % 60)) second(s) </code>"
+tg_post_msg "Toolchain Compilation Finished and pushed%0A%0ABuilder : </b><code>@ben863</code>%0A<b>Pipelines : </b><code>app.circleci.com</code>%0A<b>Vendor : </b><code>Elastics Toolchain</code>%0A<b>Clang Version : </b><code>$clang_version</code>%0A<b>Binutils Version : </b><code>$binutils_ver</code>%0A<b>LLVM Commit: </b><code>$llvm_commit_url</code>%0A<b>Builder Commit: </b><code>https://github.com/cbendot/tcbuild/commit/$builder_commit</code>%0A<b>Toolchain Bump to: </b><code>$rel_date build</code>%0A%0A<code>$((DIFF / 60)) minute(s) $((DIFF % 60)) second(s) </code>"
