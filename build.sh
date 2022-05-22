@@ -1,123 +1,133 @@
 #!/usr/bin/env bash
-#
-# Copyright (C) 2021 a xyzprjkt property
-#
 
-# Needed Secret Variable
-# KERNEL_NAME | Your kernel name
-# KERNEL_SOURCE | Your kernel link source
-# KERNEL_BRANCH  | Your needed kernel branch if needed with -b. eg -b eleven_eas
-# DEVICE_CODENAME | Your device codename
-# DEVICE_DEFCONFIG | Your device defconfig eg. lavender_defconfig
-# ANYKERNEL | Your Anykernel link repository
-# TG_TOKEN | Your telegram bot token
-# TG_CHAT_ID | Your telegram private ci chat id
-# BUILD_USER | Your username
-# BUILD_HOST | Your hostname
+# Secret Variable for CI
+# LLVM_NAME | Your desired Toolchain Name
+# TG_TOKEN | Your Telegram Bot Token
+# TG_CHAT_ID | Your Telegram Channel / Group Chat ID
+# GH_USERNAME | Your Github Username
+# GH_EMAIL | Your Github Email
+# GH_TOKEN | Your Github Token ( repo & repo_hook )
+# GH_PUSH_REPO_URL | Your Repository for store compiled Toolchain ( without https:// or www. ) ex. github.com/xyz-prjkt/xRageTC.git
 
-echo "Downloading few Dependecies . . ."
-# Kernel Sources
-git clone --depth=1 $KERNEL_SOURCE $KERNEL_BRANCH $DEVICE_CODENAME
-git clone --depth=1 https://github.com/cbendot/elastics-toolchain Elastics # Elastics set as Clang Default
+# Function to show an informational message
+msg() {
+    echo -e "\e[1;32m$*\e[0m"
+}
 
-# Main Declaration
-KERNEL_ROOTDIR=$(pwd)/$DEVICE_CODENAME # IMPORTANT ! Fill with your kernel source root directory.
-DEVICE_DEFCONFIG=$DEVICE_DEFCONFIG # IMPORTANT ! Declare your kernel source defconfig file here.
-CLANG_ROOTDIR=$(pwd)/Elastics # IMPORTANT! Put your clang directory here.
-export KBUILD_BUILD_USER=$BUILD_USER # Change with your own name or else.
-export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
+err() {
+    echo -e "\e[1;41m$*\e[0m"
+}
 
-# Main Declaration
-CLANG_VER="$("$CLANG_ROOTDIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
-LLD_VER="$("$CLANG_ROOTDIR"/bin/ld.lld --version | head -n 1)"
-export KBUILD_COMPILER_STRING="$CLANG_VER with $LLD_VER"
-IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
-DATE=$(date "+%B %-d, %Y")
-ZIP_DATE=$(date +"%Y%m%d-%H%M")
+# Set a directory
+DIR="$(pwd ...)"
+
+# Inlined function to post a message
+export BOT_MSG_URL="https://api.telegram.org/bot$TG_TOKEN/sendMessage"
+tg_post_msg() {
+	curl -s -X POST "$BOT_MSG_URL" -d chat_id="$TG_CHAT_ID" \
+	-d "disable_web_page_preview=true" \
+	-d "parse_mode=html" \
+	-d text="$1"
+}
+tg_post_build() {
+	curl --progress-bar -F document=@"$1" "$BOT_MSG_URL" \
+	-F chat_id="$TG_CHAT_ID"  \
+	-F "disable_web_page_preview=true" \
+	-F "parse_mode=html" \
+	-F caption="$3"
+}
+
+# Build Info
+rel_date="$(date "+%Y%m%d")" # ISO 8601 format
+rel_friendly_date="$(date "+%B %-d, %Y")" # "Month day, year" format
+builder_commit="$(git rev-parse HEAD)"
 START=$(date +"%s")
 
-# Checking environtment
-# Warning !! Dont Change anything there without known reason.
-function check() {
-echo ================================================
-echo xKernelCompiler
-echo version : rev1.5 - gaspoll modified
-echo ================================================
-echo BUILDER NAME = ${KBUILD_BUILD_USER}
-echo BUILDER HOSTNAME = ${KBUILD_BUILD_HOST}
-echo DEVICE_DEFCONFIG = ${DEVICE_DEFCONFIG}
-echo TOOLCHAIN_VERSION = ${KBUILD_COMPILER_STRING}
-echo CLANG_ROOTDIR = ${CLANG_ROOTDIR}
-echo KERNEL_ROOTDIR = ${KERNEL_ROOTDIR}
-echo ================================================
-}
+# Send a notificaton to TG
+tg_post_msg "<b>Elastics Clang Compilation Started</b>%0A<b>Builder : </b><code>@ben863</code>%0A<b>Server Builder : </b><code>cloud.drone.io</code>%0A<b>Vendor : </b><code>$LLVM_NAME Toolchain</code>%0A<b>Toolchain Script Commit : </b><code>$builder_commit</code>%0A<b>Build Date : </b><code>$rel_friendly_date</code>"       
 
-# Telegram
-export BOT_MSG_URL="https://api.telegram.org/bot$TG_TOKEN/sendMessage"
+# Build LLVM
+msg "Building LLVM..."
+tg_post_msg "<code>Building LLVM...</code>"
+./build-llvm.py \
+	--clang-vendor "$LLVM_NAME" \
+	--defines LLVM_PARALLEL_COMPILE_JOBS=$(nproc) LLVM_PARALLEL_LINK_JOBS=$(nproc) CMAKE_C_FLAGS=-O3 CMAKE_CXX_FLAGS=-O3 \
+	--projects "clang;lld;polly;compiler-rt;bolt" \
+	--targets "ARM;AArch64"
+	--shallow-clone \
+	--incremental \
+	--build-type "Release" \ 2>&1 | tee build.log
 
-tg_post_msg() {
-  curl -s -X POST "$BOT_MSG_URL" -d chat_id="$TG_CHAT_ID" \
-  -d "disable_web_page_preview=true" \
-  -d "parse_mode=html" \
-  -d text="$1"
-}
-
-# Post Main Information
-tg_post_msg "<b>🔨 Building Kernel Started!</b>%0A<b>Builder Name: </b><code>${KBUILD_BUILD_USER}</code>%0A<b>Builder Host: </b><code>${KBUILD_BUILD_HOST}</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Build started on: </b><code>Drone CI</code>%0A<b>Clang Rootdir : </b><code>${CLANG_ROOTDIR}</code>%0A<b>Kernel Rootdir : </b><code>${KERNEL_ROOTDIR}</code>%0A<b>Compiler Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>%0A%0A1:00 ●━━━━━━─────── 2:00 ⇆ㅤㅤㅤ ㅤ◁ㅤㅤ❚❚ㅤㅤ▷ㅤㅤㅤㅤ↻"
-
-# Compile
-compile(){
-tg_post_msg "<b>xKernelCompiler:</b><code>Compilation has started"
-cd ${KERNEL_ROOTDIR}
-make -j$(nproc) O=out ARCH=arm64 ${DEVICE_DEFCONFIG}
-make -j$(nproc) ARCH=arm64 O=out \
-    CC=${CLANG_ROOTDIR}/bin/clang \
-    AR=${CLANG_ROOTDIR}/bin/llvm-ar \
-  	NM=${CLANG_ROOTDIR}/bin/llvm-nm \
-  	OBJCOPY=${CLANG_ROOTDIR}/bin/llvm-objcopy \
-  	OBJDUMP=${CLANG_ROOTDIR}/bin/llvm-objdump \
-    STRIP=${CLANG_ROOTDIR}/bin/llvm-strip \
-    CROSS_COMPILE=${CLANG_ROOTDIR}/bin/aarch64-linux-gnu- \
-    CROSS_COMPILE_ARM32=${CLANG_ROOTDIR}/bin/arm-linux-gnueabi-
-
-   if ! [ -a "$IMAGE" ]; then
-	finerr
+# Check if the final clang binary exists or not.
+[ ! -f install/bin/clang-1* ] && {
+	err "Building LLVM failed ! Kindly check errors !!"
+	tg_post_build "build.log" "$TG_CHAT_ID" "Error Log"
 	exit 1
-   fi
-
-  git clone --depth=1 $ANYKERNEL AnyKernel
-	cp $IMAGE AnyKernel
 }
 
-# Push kernel to channel
-function push() {
-    cd AnyKernel
-    ZIP=$(echo *.zip)
-    curl -F document=@$ZIP "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
-        -F chat_id="$TG_CHAT_ID" \
-        -F "disable_web_page_preview=true" \
-        -F "parse_mode=html" \
-        -F caption="✅ $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s)"
-}
-# Fin Error
-function finerr() {
-    curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
-        -d chat_id="$TG_CHAT_ID" \
-        -d "disable_web_page_preview=true" \
-        -d "parse_mode=markdown" \
-        -d text="❌ Build throw an error(s)"
-    exit 1
-}
+# Build binutils
+msg "Building Binutils..."
+tg_post_msg "<code>Building Binutils...</code>"
+./build-binutils.py --targets arm aarch64
 
-# Zipping
-function zipping() {
-    cd AnyKernel || exit 1
-    zip -r9 $KERNEL_NAME-${ZIP_DATE}.zip *
-    cd ..
-}
-check
-compile
-zipping
+# Remove unused products
+rm -fr install/include
+rm -f install/lib/*.a install/lib/*.la
+
+# Strip remaining products
+for f in $(find install -type f -exec file {} \; | grep 'not stripped' | awk '{print $1}'); do
+	strip -s "${f: : -1}"
+done
+
+# Set executable rpaths so setting LD_LIBRARY_PATH isn't necessary
+for bin in $(find install -mindepth 2 -maxdepth 3 -type f -exec file {} \; | grep 'ELF .* interpreter' | awk '{print $1}'); do
+	# Remove last character from file output (':')
+	bin="${bin: : -1}"
+
+	echo "$bin"
+	patchelf --set-rpath "$DIR/install/lib" "$bin"
+done
+
+# Release Info
+pushd llvm-project || exit
+llvm_commit="$(git rev-parse HEAD)"
+short_llvm_commit="$(cut -c-8 <<< "$llvm_commit")"
+popd || exit
+
+llvm_commit_url="https://github.com/llvm/llvm-project/commit/$short_llvm_commit"
+binutils_ver="$(ls | grep "^binutils-" | sed "s/binutils-//g")"
+clang_version="$(install/bin/clang --version | head -n1 | cut -d' ' -f4)"
+
+tg_post_msg "<b>Pushed to GitHub :</b> <code>https://$GH_PUSH_REPO_URL</code>%0A<b>Builder : </b><code>@ben863</code>%0A<b>Server Builder : </b><code>cloud.drone.io</code>%0A<b>Vendor : </b><code>Elastics Toolchain</code>%0A<b>Clang Version : </b><code>$clang_version</code>%0A<b>Binutils Version : </b><code>$binutils_ver</code>%0A<b>LLVM Commit: </b><code>$llvm_commit_url</code>%0A<b>Builder Commit: </b><code>https://github.com/cbendot/tcbuild/commit/$builder_commit</code>%0A<b>Toolchain Bump to: </b><code>$rel_date build</code>"    
+
+# Push to GitHub
+# Update Git repository
+git config --global user.name $GH_USERNAME
+git config --global user.email $GH_EMAIL
+git clone "https://$GH_USERNAME:$GH_TOKEN@$GH_PUSH_REPO_URL" rel_repo
+pushd rel_repo || exit
+rm -fr ./*
+cp -r ../install/* .
+git checkout README.md # keep this as it's not part of the toolchain itself
+git add .
+git commit -asm "$LLVM_NAME Toolchain: Bump to $rel_date build
+
+LLVM commit: $llvm_commit_url
+Clang Version: $clang_version
+Binutils version: $binutils_ver
+Builder commit: https://github.com/cbendot/tcbuild/commit/$builder_commit"
+
+# Downgrade the HTTP version to 1.1
+git config --global http.version HTTP/1.1
+# Increase git buffer size
+git config --global http.postBuffer 55428800
+
+git push -f
+popd || exit
+
+# Set git buffer to original size
+git config --global http.version HTTP/2
+
 END=$(date +"%s")
 DIFF=$(($END - $START))
-push
+tg_post_msg "Toolchain Compilation Finished and pushed%0A%0A<code>https://$GH_PUSH_REPO_URL</code>%0A%0A<code>$((DIFF / 60)) minute(s) $((DIFF % 60)) second(s) </code>"
