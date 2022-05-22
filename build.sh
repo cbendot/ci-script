@@ -53,7 +53,9 @@ tg_post_msg "<code>Building LLVM...</code>"
 	--clang-vendor "$LLVM_NAME" \
 	--defines LLVM_PARALLEL_COMPILE_JOBS=$(nproc) LLVM_PARALLEL_LINK_JOBS=$(nproc) CMAKE_C_FLAGS=-O3 CMAKE_CXX_FLAGS=-O3 \
 	--projects "clang;lld;polly;compiler-rt;bolt" \
-	--targets "ARM;AArch64"
+	--targets "ARM;AArch64" \
+  --lto thin \
+  --pgo kernel-defconfig \
 	--shallow-clone \
 	--incremental \
 	--build-type "Release" \ 2>&1 | tee build.log
