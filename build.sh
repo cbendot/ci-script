@@ -30,9 +30,9 @@ export KBUILD_BUILD_USER=$BUILD_USER # Change with your own name or else.
 export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
 
 # Main Declaration
-GCC64_VER=$("$GCC64_ROOTDIR"/bin/aarch64-elf-gcc --version | head -n 1 )
+KBUILD_COMPILER_STRING=$("$GCC64_ROOTDIR"/bin/aarch64-elf-gcc --version | head -n 1 )
 PATH=$GCC64_DIR/bin/:$GCC32_DIR/bin/:/usr/bin:$PATH
-export KBUILD_COMPILER_STRING="$GCC64_VER"
+export KBUILD_COMPILER_STRING
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 DATE=$(date "+%B %-d, %Y")
 ZIP_DATE=$(date +"%Y%m%d")
@@ -80,8 +80,8 @@ make -j$(nproc) ARCH=arm64 O=out \
     STRIP=aarch64-elf-strip \
     NM=aarch64-elf-nm \
     LD=aarch64-elf-ld.lld \
-    CROSS_COMPILE=${GCC64_ROOTDIR}/bin/aarch64-elf-gcc- \
-    CROSS_COMPILE_ARM32=${GCC32_ROOTDIR}/bin/arm-eabi-gcc-
+    CROSS_COMPILE=${GCC64_ROOTDIR}/bin/aarch64-elf- \
+    CROSS_COMPILE_ARM32=${GCC32_ROOTDIR}/bin/arm-eabi-
 
    if ! [ -a "$IMAGE" ]; then
 	finerr
