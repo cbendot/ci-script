@@ -18,8 +18,8 @@
 echo "|| Downloading few Dependecies . . .||"
 # Kernel Sources
 git clone --depth=1 $KERNEL_SOURCE $KERNEL_BRANCH $DEVICE_CODENAME
-git clone --depth=1 https://github.com/mvaisakh/gcc-arm64.git -b gcc-master gcc64 # gcc64 set as Default
-git clone --depth=1 https://github.com/mvaisakh/gcc-arm.git -b gcc-master gcc32 # gcc32 set as Default
+git clone --depth=1 https://github.com/mvaisakh/gcc-arm64.git gcc64 # gcc64 set as Default
+git clone --depth=1 https://github.com/arter97/arm32-gcc.git gcc32 # gcc32 set as Default
 
 # Main Declaration
 KERNEL_ROOTDIR=$(pwd)/$DEVICE_CODENAME # IMPORTANT ! Fill with your kernel source root directory.
@@ -30,9 +30,9 @@ export KBUILD_BUILD_USER=$BUILD_USER # Change with your own name or else.
 export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
 
 # Main Declaration
-KBUILD_COMPILER_STRING=$("$GCC64_ROOTDIR"/bin/aarch64-elf-gcc --version | head -n 1 )
-PATH=$GCC64_DIR/bin/:$GCC32_DIR/bin/:/usr/bin:$PATH
-export KBUILD_COMPILER_STRING
+GCC64_VER=$("$GCC64_ROOTDIR"/bin/aarch64-elf-gcc --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+PATH=$GCC64_ROOTDIR/bin/:$GCC32_ROOTDIR/bin/:/usr/bin:$PATH
+export KBUILD_COMPILER_STRING="$GCC64_VER"
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 DATE=$(date "+%B %-d, %Y")
 ZIP_DATE=$(date +"%Y%m%d")
