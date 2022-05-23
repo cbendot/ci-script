@@ -30,10 +30,9 @@ export KBUILD_BUILD_USER=$BUILD_USER # Change with your own name or else.
 export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
 
 # Main Declaration
-GCC64_VER="$("$GCC64_ROOTDIR"/bin/aarch64-elf-gcc --version | head -n 1 )"
-GCC32_VER="$("$GCC32_ROOTDIR"/bin/arm-eabi-gcc --version | head -n 1 )"
-LLD_VER="$("$GCC64_ROOTDIR"/bin/ld.lld --version | head -n 1)"
-export KBUILD_COMPILER_STRING="$GCC64_VER $GCC32_VER with $LLD_VER"
+GCC64_VER=$("$GCC64_ROOTDIR"/bin/aarch64-elf-gcc --version | head -n 1 )
+PATH=$GCC64_DIR/bin/:$GCC32_DIR/bin/:/usr/bin:$PATH
+export KBUILD_COMPILER_STRING="$GCC64_VER"
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 DATE=$(date "+%B %-d, %Y")
 ZIP_DATE=$(date +"%Y%m%d")
@@ -75,6 +74,12 @@ tg_post_msg "<b>xKernelCompiler:</b><code>Compilation has started"
 cd ${KERNEL_ROOTDIR}
 make -j$(nproc) O=out ARCH=arm64 ${DEVICE_DEFCONFIG}
 make -j$(nproc) ARCH=arm64 O=out \
+    AR=aarch64-elf-ar \
+    OBJDUMP=aarch64-elf-objdump \
+    OBJCOPY=aarch64-elf-objcopy \
+    STRIP=aarch64-elf-strip \
+    NM=aarch64-elf-nm \
+    LD=aarch64-elf-ld.lld \
     CROSS_COMPILE=${GCC64_ROOTDIR}/bin/aarch64-elf-gcc- \
     CROSS_COMPILE_ARM32=${GCC32_ROOTDIR}/bin/arm-eabi-gcc-
 
