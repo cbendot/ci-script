@@ -18,21 +18,23 @@
 echo "|| Downloading few Dependecies . . .||"
 # Kernel Sources
 git clone --depth=1 $KERNEL_SOURCE $KERNEL_BRANCH $DEVICE_CODENAME
+git clone --depth=1 https://github.com/cbendot/elastics-toolchain.git clang # clang set as Default
 git clone --depth=1 https://github.com/mvaisakh/gcc-arm64.git gcc64 # gcc64 set as Default
-git clone --depth=1 https://github.com/arter97/arm32-gcc.git gcc32 # gcc32 set as Default
+git clone --depth=1 https://github.com/mvaisakh/gcc-arm.git gcc32 # gcc32 set as Default
 
 # Main Declaration
 KERNEL_ROOTDIR=$(pwd)/$DEVICE_CODENAME # IMPORTANT ! Fill with your kernel source root directory.
 DEVICE_DEFCONFIG=$DEVICE_DEFCONFIG # IMPORTANT ! Declare your kernel source defconfig file here.
+CLANG_ROOTDIR=$(pwd)/clang
 GCC64_ROOTDIR=$(pwd)/gcc64 # IMPORTANT! Put your GCC directory here.
 GCC32_ROOTDIR=$(pwd)/gcc32 # IMPORTANT! Put your GCC directory here.
 export KBUILD_BUILD_USER=$BUILD_USER # Change with your own name or else.
 export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
 
 # Main Declaration
-GCC64_VER=$("$GCC64_ROOTDIR"/bin/aarch64-elf-gcc --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
-PATH=$GCC64_ROOTDIR/bin/:$GCC32_ROOTDIR/bin/:/usr/bin:$PATH
-export KBUILD_COMPILER_STRING="$GCC64_VER"
+CLANG_VER="$("$CLANG_ROOTDIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
+LLD_VER="$("$CLANG_ROOTDIR"/bin/ld.lld --version | head -n 1)"
+export KBUILD_COMPILER_STRING="$CLANG_VER with $LLD_VER"
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 DATE=$(date "+%B %-d, %Y")
 ZIP_DATE=$(date +"%Y%m%d")
@@ -74,6 +76,7 @@ tg_post_msg "<b>xKernelCompiler:</b><code>Compilation has started"
 cd ${KERNEL_ROOTDIR}
 make -j$(nproc) O=out ARCH=arm64 ${DEVICE_DEFCONFIG}
 make -j$(nproc) ARCH=arm64 O=out \
+    CC=${CLANG_ROOTDIR}/bin/clang \
     AR=aarch64-elf-ar \
     OBJDUMP=aarch64-elf-objdump \
     OBJCOPY=aarch64-elf-objcopy \
