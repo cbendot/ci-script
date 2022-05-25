@@ -2,11 +2,10 @@ version: 2.1
 jobs:
   compile:
     docker:
-      - image: xyzuan/xdocker:latest
+      - image: zycromerz/kerneldocker:v3
     steps:
       - run:
-          command: |
-            apt update && apt upgrade -y
+          command: |            
             curl https://raw.githubusercontent.com/cbendot/ci-script/ci-gcc/build.sh > run.sh
             source run.sh
           no_output_timeout: 5h
