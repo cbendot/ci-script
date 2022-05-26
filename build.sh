@@ -7,7 +7,9 @@
 # GH_USERNAME | Your Github Username
 # GH_EMAIL | Your Github Email
 # GH_TOKEN | Your Github Token ( repo & repo_hook )
-# GH_PUSH_REPO_URL | Your Repository for store compiled Toolchain ( without https:// or www. ) ex. github.com/xyz-prjkt/xRageTC.git
+# GL_TOKEN | Your GitLab Token 
+# GH_PUSH_REPO_URL | Your GitHub Repository for store compiled Toolchain ( without https:// or www. ) ex. github.com/xyz-prjkt/xRageTC.git
+# GL_PUSH_REPO_URL | Your GitLab Repository
 
 # Function to show an informational message
 msg() {
@@ -44,7 +46,7 @@ builder_commit="$(git rev-parse HEAD)"
 START=$(date +"%s")
 
 # Send a notificaton to TG
-tg_post_msg "<b>Elastics Clang Compilation Started</b>%0A<b>Builder : </b><code>@ben863</code>%0A<b>Pipelines : </b><code>app.circleci.com</code>%0A<b>Vendor : </b><code>$LLVM_NAME Toolchain</code>%0A<b>Toolchain Script Commit : </b><code>$builder_commit</code>%0A<b>Build Date : </b><code>$rel_friendly_date</code>"       
+tg_post_msg "<b>Elastics Clang Compilation Started</b>%0A<b>Builder : </b><code>@ben863</code>%0A<b>Pipeline Host : </b><code>DroneCI</code>%0A<b>Vendor : </b><code>$LLVM_NAME clang</code>%0A<b>Toolchain Script Commit : </b><code>$builder_commit</code>%0A<b>Build Date : </b><code>$rel_friendly_date</code>"
 
 # Build LLVM
 msg "Building LLVM..."
@@ -55,7 +57,6 @@ tg_post_msg "<code>Building LLVM...</code>"
 	--projects "clang;lld;polly;compiler-rt" \
 	--targets "ARM;AArch64" \
 	--shallow-clone \
-	--bolt \
 	--incremental \
 	--build-type "Release" 2>&1 | tee build.log
 
@@ -99,25 +100,27 @@ llvm_commit_url="https://github.com/llvm/llvm-project/commit/$short_llvm_commit"
 binutils_ver="$(ls | grep "^binutils-" | sed "s/binutils-//g")"
 clang_version="$(install/bin/clang --version | head -n1 | cut -d' ' -f4)"
 
-tg_post_msg "<code>Pushed to GitHub...</code>"   
+tg_post_msg "<b>Elastics Clang Compilation Finished</b>%0A<b>Builder : </b><code>@ben863</code>%0A<b>Pipeline Host : </b><code>DroneCI</code>%0A<b>Clang Version : </b><code>$clang_version</code>%0A<b>Binutils Version : </b><code>$binutils_ver</code>%0A<b>LLVM Commit: </b><code>$llvm_commit_url</code>%0A<b>Builder Commit: </b><code>https://github.com/cbendot/tcbuild/commit/$builder_commit</code>%0A<b>Elastics Clang Bump to: </b><code>$rel_date build</code>"
 
 # Push to GitHub
 # Update Git repository
-git config --global user.name $GH_USERNAME
-git config --global user.email $GH_EMAIL
-git clone "https://$GH_USERNAME:$GH_TOKEN@$GH_PUSH_REPO_URL" rel_repo
+git config --global user.name "ben863"
+git config --global user.email "r.budhiono@gmail.com"
+git clone "https://ben863:$GL_TOKEN@gitlab.com/ben863/elastics-clang.git" rel_repo
 pushd rel_repo || exit
 rm -fr ./*
 cp -r ../install/* .
 git checkout README.md # keep this as it's not part of the toolchain itself
 git add .
-git commit -asm "$LLVM_NAME Toolchain: Bump to $rel_date build
+git commit -asm "$LLVM_NAME Clang: Bump to $rel_date build
 
 LLVM commit: $llvm_commit_url
 Clang Version: $clang_version
 Binutils version: $binutils_ver
 Builder commit: https://github.com/cbendot/tcbuild/commit/$builder_commit"
 
+# HTTP Basic Authentication
+git config --global http.emptyAuth true
 # Downgrade the HTTP version to 1.1
 git config --global http.version HTTP/1.1
 # Increase git buffer size
@@ -131,4 +134,4 @@ git config --global http.version HTTP/2
 
 END=$(date +"%s")
 DIFF=$(($END - $START))
-tg_post_msg "Toolchain Compilation Finished and pushed%0A%0ABuilder : </b><code>@ben863</code>%0A<b>Pipelines : </b><code>app.circleci.com</code>%0A<b>Vendor : </b><code>Elastics Toolchain</code>%0A<b>Clang Version : </b><code>$clang_version</code>%0A<b>Binutils Version : </b><code>$binutils_ver</code>%0A<b>LLVM Commit: </b><code>$llvm_commit_url</code>%0A<b>Builder Commit: </b><code>https://github.com/cbendot/tcbuild/commit/$builder_commit</code>%0A<b>Toolchain Bump to: </b><code>$rel_date build</code>%0A%0A<code>$((DIFF / 60)) minute(s) $((DIFF % 60)) second(s) </code>"
+tg_post_msg "Toolchain Compilation Finished and pushed%0A%0A<code>$((DIFF / 60)) minute(s) $((DIFF % 60)) second(s) </code>"
