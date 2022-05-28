@@ -33,9 +33,9 @@ export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
 
 # Main Declaration
 # CLANG_VER="$("$CLANG_ROOTDIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
-GCC_VER="$("$GCC64_ROOTDIR"/bin/aarch64-buildroot-linux-gnu-gcc --version | head -n 1)"
-LLD_VER="$("$GCC64_ROOTDIR"/bin/ld.lld --version | head -n 1)"
-export KBUILD_COMPILER_STRING="$GCC64_VER with $LLD_VER"
+GCC64_VER="$("$GCC64_ROOTDIR"/bin/aarch64-buildroot-linux-gnu-gcc --version | head -n 1)"
+GCC32_VER="$("$GCC32_ROOTDIR"/bin/arm-buildroot-linux-gnueabihf-gcc --version | head -n 1)"
+export KBUILD_COMPILER_STRING="$GCC64_VER with $GCC32_VER"
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 DATE=$(date "+%B %-d, %Y")
 ZIP_DATE=$(date +"%Y%m%d")
@@ -69,7 +69,7 @@ tg_post_msg() {
 }
 
 # Post Main Information
-tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Builder Name: </b><code>${KBUILD_BUILD_USER}</code>%0A<b>Builder Host: </b><code>${KBUILD_BUILD_HOST}</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Build started on: </b><code>CircleCI</code>%0A<b>Compiler Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
+tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Triggered by: </b><code>${KBUILD_BUILD_USER}</code>%0A<b>Pipelines Host: </b><code>${KBUILD_BUILD_HOST}</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Build started on: </b><code>CircleCI</code>%0A<b>Compiler Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
 
 # Compile
 compile(){
@@ -77,11 +77,11 @@ tg_post_msg "<b>xKernelCompiler:</b><code>Compilation has started"
 cd ${KERNEL_ROOTDIR}
 make -j$(nproc) O=out ARCH=arm64 ${DEVICE_DEFCONFIG}
 make -j$(nproc) ARCH=arm64 O=out \
-    AR=${GCC64_ROOTDIR}/bin/llvm-ar \
-  	NM=${GCC64_ROOTDIR}/bin/llvm-nm \
-  	OBJCOPY=${GCC64_ROOTDIR}/bin/llvm-objcopy \
-  	OBJDUMP=${GCC64_ROOTDIR}/bin/llvm-objdump \
-    STRIP=${GCC64_ROOTDIR}/bin/llvm-strip \
+    AR=${GCC64_ROOTDIR}/bin/aarch64-buildroot-linux-gnu-ar \
+  	NM=${GCC64_ROOTDIR}/bin/aarch64-buildroot-linux-gnu-nm \
+  	OBJCOPY=${GCC64_ROOTDIR}/bin/aarch64-buildroot-linux-gnu-objcopy \
+  	OBJDUMP=${GCC64_ROOTDIR}/bin/aarch64-buildroot-linux-gnu-objdump \
+    STRIP=${GCC64_ROOTDIR}/bin/aarch64-buildroot-linux-gnu-strip \
     CROSS_COMPILE=${GCC64_ROOTDIR}/bin/aarch64-buildroot-linux-gnu- \
     CROSS_COMPILE_ARM32=${GCC32_ROOTDIR}/bin/arm-buildroot-linux-gnueabihf-
 
