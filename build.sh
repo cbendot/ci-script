@@ -18,7 +18,7 @@
 echo "|| Downloading few Dependecies . . .||"
 # Kernel Sources
 git clone --depth=1 $KERNEL_SOURCE -b hmp $DEVICE_CODENAME
-git clone --depth=1 https://gitlab.com/ben863/elastics-clang.git clang-llvm # Elastics set as Clang Default
+git clone --depth=1 https://github.com/cbendot/elastics-clang.git clang-llvm # Elastics set as Clang Default
 
 # Main Declaration
 KERNEL_ROOTDIR=$(pwd)/$DEVICE_CODENAME # IMPORTANT ! Fill with your kernel source root directory.
@@ -81,12 +81,8 @@ make -j$(nproc) ARCH=arm64 O=out \
     CROSS_COMPILE_ARM32=${CLANG_ROOTDIR}/bin/arm-linux-gnueabi-
 
    if ! [ -a "$IMAGE" ]; then
-	  curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
-        -d chat_id="$TG_CHAT_ID" \
-        -d "disable_web_page_preview=true" \
-        -d "parse_mode=markdown" \
-        -d text="❌ Build throw an error(s)"
-	exit 1
+	  tg_post_msg "❌ Build throw an error(s)"
+	  exit 1
    fi
 
   git clone --depth=1 $ANYKERNEL AnyKernel
@@ -107,7 +103,7 @@ function push() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 [LV][OC]$KERNEL_NAME-EAS-${ZIP_DATE}.zip *
+    zip -r9 [LV]$KERNEL_NAME-HMP-${ZIP_DATE}.zip *
     cd ..
 
 }
