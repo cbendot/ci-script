@@ -6,9 +6,6 @@ jobs:
     steps:
       - run:
           command: | 
-            git clone https://gihub.com/cbendot/ci-script.git ci
-            cd ci
-            cp -af sources.list /etc/apt/
             apt-get autoremove -y && apt-get --purge remove -y && apt-get autoclean -y && apt-get update -y && apt-get upgrade -y
             apt-get install -y bc binutils-dev bison build-essential ca-certificates ccache clang cmake curl file flex git libelf-dev libssl-dev lld make ninja-build python3-dev texinfo u-boot-tools xz-utils zlib1g-dev
             curl https://raw.githubusercontent.com/cbendot/ci-script/ci-tcbuild/build.sh > run.sh
