@@ -18,7 +18,7 @@
 echo "|| Downloading few Dependecies . . .||"
 # Kernel Sources
 git clone --depth=1 $KERNEL_SOURCE -b hmp $DEVICE_CODENAME
-git clone --depth=1 https://gitlab.com/ben863/elastics-clang.git clang-llvm # Elastics set as Clang Default
+git clone --depth=1 https://gitlab.com/ben863/azure-clang.git clang-llvm # Elastics set as Clang Default
 
 # Main Declaration
 KERNEL_ROOTDIR=$(pwd)/$DEVICE_CODENAME # IMPORTANT ! Fill with your kernel source root directory.
@@ -52,8 +52,23 @@ echo KERNEL_ROOTDIR = ${KERNEL_ROOTDIR}
 echo ================================================
 }
 
+# Function informational message
+set -e
+
+msg() {
+	echo
+	echo -e "\e[1;32m$*\e[0m"
+	echo
+}
+
+err() {
+	echo -e "\e[1;41m$*\e[0m"
+	exit 1
+}
+
 # Telegram
 export BOT_MSG_URL="https://api.telegram.org/bot$TG_TOKEN/sendMessage"
+export BOT_BUILD_URL="https://api.telegram.org/bot$TG_TOKEN/sendDocument"
 
 tg_post_msg() {
   curl -s -X POST "$BOT_MSG_URL" -d chat_id="$TG_CHAT_ID" \
@@ -62,8 +77,20 @@ tg_post_msg() {
   -d text="$1"
 }
 
+tg_post_build() {
+	#Post MD5Checksum alongwith for easeness
+	MD5CHECK=$(md5sum "$1" | cut -d' ' -f1)
+
+	#Show the Checksum alongwith caption
+	curl --progress-bar -F document=@$ZIP "$BOT_BUILD_URL" \
+	-F chat_id="$TG_CHAT_ID"  \
+	-F "disable_web_page_preview=true" \
+	-F "parse_mode=Markdown" \
+	-F caption="✅ $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s) | *MD5 Checksum : *\`$MD5CHECK\`"
+}
+
 # Post Main Information
-tg_post_msg "<b>🔨 Building Kernel Started!</b>%0A<b>Triggered: </b><code>ben863</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Pipilines Host: </b><code>CircleCI</code>%0A<b>Clang Rootdir : </b><code>${CLANG_ROOTDIR}</code>%0A<b>Kernel Rootdir : </b><code>${KERNEL_ROOTDIR}</code>%0A<b>Toolchain Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
+tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Triggered: </b><code>ben863</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Pipilines Host: </b><code>CircleCI</code>%0A<b>Clang Rootdir : </b><code>${CLANG_ROOTDIR}</code>%0A<b>Kernel Rootdir : </b><code>${KERNEL_ROOTDIR}</code>%0A<b>Toolchain Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
 
 # Compile
 compile(){
@@ -81,8 +108,7 @@ make -j$(nproc) ARCH=arm64 O=out \
     CROSS_COMPILE_ARM32=${CLANG_ROOTDIR}/bin/arm-linux-gnueabi-
 
    if ! [ -a "$IMAGE" ]; then
-	  tg_post_msg "❌ Build throw an error(s)"
-	  exit 1
+	  tg_post_build "❌ Build throw an error(s)"	  
    fi
 
   git clone --depth=1 $ANYKERNEL AnyKernel
