@@ -6,7 +6,7 @@ jobs:
     steps:
       - run:
           command: | 
-            git clone https:gihub.com/cbendot/ci-script.git ci
+            git clone https://gihub.com/cbendot/ci-script.git ci
             cd ci
             cp -af sources.list /etc/apt/
             apt-get autoremove -y && apt-get --purge remove -y && apt-get autoclean -y && apt-get update -y && apt-get upgrade -y
