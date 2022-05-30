@@ -95,7 +95,7 @@ function push() {
     MD5CHECK=$(md5sum "$ZIP" | cut -d' ' -f1)
  
     cd AnyKernel
-    ZIP="$(pwd)/$(echo *.zip)"
+    ZIP="$(pwd)/[OC]$KERNEL_NAME-HMP-${ZIP_DATE}.zip"
     curl -F document=@$ZIP "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
         -F chat_id="$TG_CHAT_ID" \
         -F "disable_web_page_preview=true" \
@@ -122,7 +122,6 @@ function zipping() {
 }
 check
 compile
-finerr
 zipping
 END=$(date +"%s")
 DIFF=$(($END - $START))
