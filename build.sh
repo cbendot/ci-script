@@ -92,7 +92,7 @@ make -j$(nproc) ARCH=arm64 O=out \
 # Push kernel to channel
 function push() {
 # Post MD5Checksum alongwith for easeness
-	  MD5CHECK=$(md5sum "$1" | cut -d' ' -f1)    
+	  MD5CHECK=$(md5sum "$ZIP" | cut -d' ' -f1)    
 # Show the Checksum alongwith caption    
     cd AnyKernel
     ZIP=$(echo *.zip)
@@ -105,11 +105,7 @@ function push() {
 
 # Fin Error
 function finerr() {
-    curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
-        -d chat_id="$TG_CHAT_ID" \
-        -d "disable_web_page_preview=true" \
-        -d "parse_mode=markdown" \
-        -d text="❌ Build throw an error(s)"
+    tg_post_msg "❌ Build throw an error(s)"
     exit 1
 }
 
