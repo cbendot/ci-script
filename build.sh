@@ -68,7 +68,7 @@ tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Triggered by: </b><code>ben863
 
 # Compile
 compile(){
-tg_post_msg "<b>xKernelCompiler:</b>Compilation has started"
+tg_post_msg "<b>$KERNEL_NAME</b>%0A<b>Source: </b>$KERNEL_SOURCE"
 cd ${KERNEL_ROOTDIR}
 make -j$(nproc) O=out ARCH=arm64 ${DEVICE_DEFCONFIG}
 make -j$(nproc) ARCH=arm64 O=out \
@@ -82,6 +82,7 @@ make -j$(nproc) ARCH=arm64 O=out \
     CROSS_COMPILE_ARM32=${CLANG_ROOTDIR}/bin/arm-linux-gnueabi-
 
    if ! [ -a "$IMAGE" ]; then
+  tg_post_msg "❌ Build throw an error(s)%0A$(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s)"
 	finerr
   exit 1   
    fi
@@ -91,16 +92,14 @@ make -j$(nproc) ARCH=arm64 O=out \
 }
 
 # Push kernel to channel
-function push() {
-    MD5CHECK=$(md5sum "$ZIP" | cut -d' ' -f1)
- 
+function push() {   
     cd AnyKernel
-    ZIP="$(pwd)/[OC]$KERNEL_NAME-HMP-${ZIP_DATE}.zip"
+    ZIP=$(echo *.zip)
     curl -F document=@$ZIP "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
         -F chat_id="$TG_CHAT_ID" \
         -F "disable_web_page_preview=true" \
         -F "parse_mode=html" \
-        -F caption="✅ $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s) | *MD5 Checksum : *\`$MD5CHECK\`"
+        -F caption="✅ $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s)"
 }
 
 # Fin Error
