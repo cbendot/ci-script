@@ -63,6 +63,17 @@ tg_post_msg() {
   -d text="$1"
 }
 
+tg_post_build() {
+	#Post MD5Checksum alongwith for easeness
+	MD5CHECK=$(md5sum "$ZIP" | cut -d' ' -f1)
+
+	#Show the Checksum alongwith caption
+	curl --progress-bar -F document=@$ZIP "$BOT_BUILD_URL" \
+	-F chat_id="$TG_CHAT_ID"  \
+	-F "disable_web_page_preview=true" \
+	-F "parse_mode=Markdown" \
+	-F caption="✅ $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s) | *MD5 Checksum : *\`$MD5CHECK\`"
+}
 # Post Main Information
 tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Triggered by: </b><code>ben863</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Pipelines Host: </b><code>CircleCI</code>%0A<b>Clang Rootdir : </b><code>${CLANG_ROOTDIR}</code>%0A<b>Kernel Rootdir : </b><code>${KERNEL_ROOTDIR}</code>%0A<b>Toolchain Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
 
@@ -82,7 +93,8 @@ make -j$(nproc) ARCH=arm64 O=out \
     CROSS_COMPILE_ARM32=${CLANG_ROOTDIR}/bin/arm-linux-gnueabi-
 
    if ! [ -a "$IMAGE" ]; then
-	finerr   
+	finerr
+  exit 1   
    fi
 
   git clone --depth=1 $ANYKERNEL AnyKernel
@@ -91,21 +103,18 @@ make -j$(nproc) ARCH=arm64 O=out \
 
 # Push kernel to channel
 function push() {
-# Post MD5Checksum alongwith for easeness
-	  MD5CHECK=$(md5sum "$ZIP" | cut -d' ' -f1)    
-# Show the Checksum alongwith caption    
     cd AnyKernel
     ZIP=$(echo *.zip)
     curl -F document=@$ZIP "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
         -F chat_id="$TG_CHAT_ID" \
         -F "disable_web_page_preview=true" \
         -F "parse_mode=html" \
-        -F caption="✅ $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s) | *MD5 Checksum : *\`$MD5CHECK\`"
+        -F caption="✅ $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s)"
 }
 
 # Fin Error
 function finerr() {
-    tg_post_msg "❌ Build throw an error(s)"
+    tg_post_msg "Build throw an error(s)"
     exit 1
 }
 
