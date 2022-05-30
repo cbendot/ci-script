@@ -63,23 +63,12 @@ tg_post_msg() {
   -d text="$1"
 }
 
-tg_post_build() {
-	#Post MD5Checksum alongwith for easeness
-	MD5CHECK=$(md5sum "$ZIP" | cut -d' ' -f1)
-
-	#Show the Checksum alongwith caption
-	curl --progress-bar -F document=@$ZIP "$BOT_BUILD_URL" \
-	-F chat_id="$TG_CHAT_ID"  \
-	-F "disable_web_page_preview=true" \
-	-F "parse_mode=Markdown" \
-	-F caption="✅ $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s) | *MD5 Checksum : *\`$MD5CHECK\`"
-}
 # Post Main Information
 tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Triggered by: </b><code>ben863</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Pipelines Host: </b><code>CircleCI</code>%0A<b>Clang Rootdir : </b><code>${CLANG_ROOTDIR}</code>%0A<b>Kernel Rootdir : </b><code>${KERNEL_ROOTDIR}</code>%0A<b>Toolchain Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
 
 # Compile
 compile(){
-tg_post_msg "<b>xKernelCompiler:</b><code>Compilation has started"
+tg_post_msg "<b>xKernelCompiler:</b>Compilation has started"
 cd ${KERNEL_ROOTDIR}
 make -j$(nproc) O=out ARCH=arm64 ${DEVICE_DEFCONFIG}
 make -j$(nproc) ARCH=arm64 O=out \
@@ -103,30 +92,37 @@ make -j$(nproc) ARCH=arm64 O=out \
 
 # Push kernel to channel
 function push() {
+    MD5CHECK=$(md5sum "$ZIP" | cut -d' ' -f1)
+ 
     cd AnyKernel
-    ZIP=$(echo *.zip)
+    ZIP="$(pwd)/$(echo *.zip)"
     curl -F document=@$ZIP "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
         -F chat_id="$TG_CHAT_ID" \
         -F "disable_web_page_preview=true" \
         -F "parse_mode=html" \
-        -F caption="✅ $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s)"
+        -F caption="✅ $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s) | *MD5 Checksum : *\`$MD5CHECK\`"
 }
 
 # Fin Error
 function finerr() {
-    tg_post_msg "Build throw an error(s)"
+    curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
+        -d chat_id="$TG_CHAT_ID" \
+        -d "disable_web_page_preview=true" \
+        -d "parse_mode=markdown" \
+        -d text="❌ Build throw an error(s)%0A$(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s)"
     exit 1
 }
 
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 $KERNEL_NAME-HMP-${ZIP_DATE}.zip *
+    zip -r9 [OC]$KERNEL_NAME-HMP-${ZIP_DATE}.zip *
     cd ..
 
 }
 check
 compile
+finerr
 zipping
 END=$(date +"%s")
 DIFF=$(($END - $START))
