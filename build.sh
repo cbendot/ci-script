@@ -17,7 +17,7 @@
 
 echo "|| Downloading few Dependecies . . .||"
 # Kernel Sources
-git clone --depth=1 $KERNEL_SOURCE -b hmp $DEVICE_CODENAME
+git clone --depth=1 $KERNEL_SOURCE -b eas $DEVICE_CODENAME
 git clone --depth=1 https://gitlab.com/ben863/azure-clang.git clang-llvm # Elastics set as Clang Default
 
 # Main Declaration
@@ -82,9 +82,8 @@ make -j$(nproc) ARCH=arm64 O=out \
     CROSS_COMPILE_ARM32=${CLANG_ROOTDIR}/bin/arm-linux-gnueabi-
 
    if ! [ -a "$IMAGE" ]; then
-  tg_post_msg "❌ Build throw an error(s)%0A$(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s)"
-	finerr
-  exit 1   
+	error
+  exit 1
    fi
 
   git clone --depth=1 $ANYKERNEL AnyKernel
@@ -103,7 +102,7 @@ function push() {
 }
 
 # Fin Error
-function finerr() {
+error() {
     curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
         -d chat_id="$TG_CHAT_ID" \
         -d "disable_web_page_preview=true" \
