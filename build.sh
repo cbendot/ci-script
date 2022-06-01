@@ -17,15 +17,13 @@
 
 echo "|| Downloading few Dependecies . . .||"
 # Kernel Sources
-git clone --depth=1 $KERNEL_SOURCE $KERNEL_BRANCH $DEVICE_CODENAME
-# git clone --depth=1 https://gitlab.com/ben863/azure-clang.git clang # clang set as Default
+git clone --depth=1 https://github.com/asus-sdm660-devs/android_kernel_asus_sdm660.git -b lineage-19.1 $DEVICE_CODENAME
 git clone --depth=1 https://github.com/cbendot/aarch64.git gcc64 # gcc64 set as Default
 git clone --depth=1 https://github.com/cbendot/armv7.git gcc32 # gcc32 set as Default
 
 # Main Declaration
 KERNEL_ROOTDIR=$(pwd)/$DEVICE_CODENAME # IMPORTANT ! Fill with your kernel source root directory.
 DEVICE_DEFCONFIG=$DEVICE_DEFCONFIG # IMPORTANT ! Declare your kernel source defconfig file here.
-# CLANG_ROOTDIR=$(pwd)/clang
 GCC64_ROOTDIR=$(pwd)/gcc64 # IMPORTANT! Put your GCC directory here.
 GCC32_ROOTDIR=$(pwd)/gcc32 # IMPORTANT! Put your GCC directory here.
 export KBUILD_BUILD_USER=$BUILD_USER # Change with your own name or else.
@@ -34,8 +32,7 @@ export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
 # Main Declaration
 # CLANG_VER="$("$CLANG_ROOTDIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
 GCC64_VER="$("$GCC64_ROOTDIR"/bin/aarch64-buildroot-linux-gnu-gcc --version | head -n 1)"
-GCC32_VER="$("$GCC32_ROOTDIR"/bin/arm-buildroot-linux-gnueabihf-gcc --version | head -n 1)"
-export KBUILD_COMPILER_STRING="$GCC64_VER with $GCC32_VER"
+export KBUILD_COMPILER_STRING="$GCC64_VER"
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 DATE=$(date "+%B %-d, %Y")
 ZIP_DATE=$(date +"%Y%m%d")
@@ -73,7 +70,7 @@ tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Triggered by: </b><code>ben863
 
 # Compile
 compile(){
-tg_post_msg "<b>xKernelCompiler:</b><code>Compilation has started"
+tg_post_msg "<b>$KERNEL_NAME: </b>$KERNEL_SOURCE"
 cd ${KERNEL_ROOTDIR}
 make -j$(nproc) O=out ARCH=arm64 ${DEVICE_DEFCONFIG}
 make -j$(nproc) ARCH=arm64 O=out \
@@ -86,7 +83,7 @@ make -j$(nproc) ARCH=arm64 O=out \
     CROSS_COMPILE_ARM32=${GCC32_ROOTDIR}/bin/arm-buildroot-linux-gnueabihf-
 
    if ! [ -a "$IMAGE" ]; then
-	finerr
+	error
 	exit 1
    fi
 
@@ -106,7 +103,7 @@ function push() {
 }
 
 # Fin Error
-function finerr() {
+error() {
     curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
         -d chat_id="$TG_CHAT_ID" \
         -d "disable_web_page_preview=true" \
@@ -118,7 +115,7 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 [LV][OC]$KERNEL_NAME-EAS-${ZIP_DATE}.zip *
+    zip -r9 $KERNEL_NAME-${ZIP_DATE}.zip *
     cd ..
 
 }
