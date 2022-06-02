@@ -17,9 +17,11 @@
 
 echo "|| Downloading few Dependecies . . .||"
 # Kernel Sources
-git clone --depth=1 https://github.com/asus-sdm660-devs/android_kernel_asus_sdm660.git -b lineage-19.1 $DEVICE_CODENAME
+git clone --depth=1 $KERNEL_SOURCE -b eas $DEVICE_CODENAME
 git clone --depth=1 https://github.com/cbendot/aarch64.git gcc64 # gcc64 set as Default
 git clone --depth=1 https://github.com/cbendot/armv7.git gcc32 # gcc32 set as Default
+# git clone --depth=1 https://github.com/mvaisakh/gcc-arm64.git gcc64
+# git clone --depth=1 https://github.com/mvaisakh/gcc-arm32.git gcc32
 
 # Main Declaration
 KERNEL_ROOTDIR=$(pwd)/$DEVICE_CODENAME # IMPORTANT ! Fill with your kernel source root directory.
@@ -30,8 +32,9 @@ export KBUILD_BUILD_USER=$BUILD_USER # Change with your own name or else.
 export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
 
 # Main Declaration
-# CLANG_VER="$("$CLANG_ROOTDIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
+# 
 GCC64_VER="$("$GCC64_ROOTDIR"/bin/aarch64-buildroot-linux-gnu-gcc --version | head -n 1)"
+# GCC64_VER="$("$GCC64_ROOTDIR"/bin/aarch64-elf-gcc --version | head -n 1)"
 export KBUILD_COMPILER_STRING="$GCC64_VER"
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 DATE=$(date "+%B %-d, %Y")
