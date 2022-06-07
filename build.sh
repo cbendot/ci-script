@@ -17,8 +17,9 @@
 
 echo "|| Downloading few Dependecies . . .||"
 # Kernel Sources
-git clone --depth=1 $KERNEL_SOURCE -b eas $DEVICE_CODENAME
-git clone --depth=1 https://gitlab.com/ben863/azure-clang.git clang-llvm # Elastics set as Clang Default
+git clone --depth=1 $KERNEL_SOURCE -b hmp $DEVICE_CODENAME
+git clone --depth=1 https://gitlab.com/ben863/elastics-clang.git clang-llvm # Elastics set as Clang Default
+# git clone --depth=1 https://gitlab.com/ben863/azure-clang.git clang-llvm 
 
 # Main Declaration
 KERNEL_ROOTDIR=$(pwd)/$DEVICE_CODENAME # IMPORTANT ! Fill with your kernel source root directory.
@@ -114,7 +115,7 @@ error() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 $KERNEL_NAME-EAS-${ZIP_DATE}.zip *
+    zip -r9 $KERNEL_NAME-HMP-${ZIP_DATE}.zip *
     cd ..
 
 }
