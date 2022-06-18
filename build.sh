@@ -17,7 +17,8 @@
 
 echo "|| Downloading few Dependecies . . .||"
 # Kernel Sources
-git clone --depth=1 $KERNEL_SOURCE -b hmp $DEVICE_CODENAME
+# git clone --depth=1 $KERNEL_SOURCE -b hmp $DEVICE_CODENAME
+git clone --depth=1 $KERNEL_SOURCE -b eas $DEVICE_CODENAME
 git clone --depth=1 https://gitlab.com/ben863/azure-clang clang-llvm # Elastics set as Clang Default
 git clone --depth=1 https://gitlab.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-r450784.git clang-aosp
 # git clone --depth=1 https://github.com/RyuujiX/aarch64-linux-android-4.9.git gcc64
@@ -119,7 +120,7 @@ error() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 $KERNEL_NAME-HMP-${ZIP_DATE}.zip *
+    zip -r9 $KERNEL_NAME-EAS-${ZIP_DATE}.zip *
     cd ..
 
 }
