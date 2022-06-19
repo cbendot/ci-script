@@ -20,7 +20,7 @@ echo "|| Downloading few Dependecies . . .||"
 # git clone --depth=1 $KERNEL_SOURCE -b hmp $DEVICE_CODENAME
 git clone --depth=1 $KERNEL_SOURCE -b eas $DEVICE_CODENAME
 # git clone --depth=1 https://gitlab.com/ben863/azure-clang clang-llvm # Elastics set as Clang Default
-#git clone --depth=1 https://gitlab.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-r450784.git clang-aosp
+# git clone --depth=1 https://gitlab.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-r450784.git clang-aosp
 git clone --depth=1 https://gitlab.com/STRK-ND/aosp-clang.git clang-aosp
 git clone --depth=1 https://github.com/cbendot/gcc-aarch64.git gcc64
 git clone --depth=1 https://github.com/cbendot/gcc-armv7.git gcc32 
@@ -40,7 +40,6 @@ CLANG_VER="$("$CLANG_ROOTDIR"/bin/clang --version | head -n 1 | perl -pe 's/\(ht
 # LLD_VER="$("$CLANG_ROOTDIR"/bin/ld.lld --version | head -n 1)"
 GCC_VER="$("$GCC64_ROOTDIR"/bin/aarch64-buildroot-linux-gnu-gcc --version | head -n 1)"
 export KBUILD_COMPILER_STRING="$CLANG_VER with $GCC_VER"
-COMMIT_HEAD=$(git log --oneline -1)
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 DATE=$(date "+%B %-d, %Y")
 ZIP_DATE=$(date +"%Y%m%d")
@@ -78,7 +77,6 @@ tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Triggered by: </b><code>ben863
 
 # Compile
 compile(){
-tg_post_msg "<b>Last commit: </b>$COMMIT_HEAD"
 cd ${KERNEL_ROOTDIR}
 make -j$(nproc) O=out ARCH=arm64 SUBARCH=arm64 ${DEVICE_DEFCONFIG}
 make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
