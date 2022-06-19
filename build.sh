@@ -39,6 +39,7 @@ CLANG_VER="$("$CLANG_ROOTDIR"/bin/clang --version | head -n 1 | perl -pe 's/\(ht
 # LLD_VER="$("$CLANG_ROOTDIR"/bin/ld.lld --version | head -n 1)"
 GCC_VER="$("$GCC64_ROOTDIR"/bin/aarch64-buildroot-linux-gnu-gcc --version | head -n 1)"
 export KBUILD_COMPILER_STRING="$CLANG_VER with $GCC_VER"
+COMMIT_HEAD=$(git log --oneline -1)
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 DATE=$(date "+%B %-d, %Y")
 ZIP_DATE=$(date +"%Y%m%d")
@@ -72,14 +73,14 @@ tg_post_msg() {
 }
 
 # Post Main Information
-tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Triggered by: </b><code>ben863</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Pipelines Host: </b><code>CircleCI</code>%0A<b>Clang Rootdir : </b><code>${CLANG_ROOTDIR}</code>%0A<b>Kernel Rootdir : </b><code>${KERNEL_ROOTDIR}</code>%0A<b>Toolchain Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
+tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Triggered by: </b><code>ben863</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Pipelines Host: </b><code>CircleCI</code>%0A<b>Kernel Source: </b>$KERNEL_SOURCE%0A<b>Toolchain Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
 
 # Compile
 compile(){
-tg_post_msg "<b>$KERNEL_NAME</b>%0A<b>Source: </b>$KERNEL_SOURCE"
+tg_post_msg "<b>Last commit: </b>$COMMIT_HEAD"
 cd ${KERNEL_ROOTDIR}
-make -j$(nproc) O=out ARCH=arm64 ${DEVICE_DEFCONFIG}
-make -j$(nproc) ARCH=arm64 O=out \
+make -j$(nproc) O=out ARCH=arm64 SUBARCH=arm64 ${DEVICE_DEFCONFIG}
+make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
     CC=${CLANG_ROOTDIR}/bin/clang \
     AR=${CLANG_ROOTDIR}/bin/llvm-ar \
   	NM=${CLANG_ROOTDIR}/bin/llvm-nm \
