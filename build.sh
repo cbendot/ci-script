@@ -39,7 +39,7 @@ export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
 CLANG_VER="$("$CLANG_ROOTDIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
 # LLD_VER="$("$CLANG_ROOTDIR"/bin/ld.lld --version | head -n 1)"
 # GCC_VER="$("$GCC32_ROOTDIR"/bin/arm-buildroot-linux-gnueabi-gcc --version | head -n 1)"
-export KBUILD_COMPILER_STRING="$CLANG_VER and gcc (Buildroot toolchains.bootlin.com-2021.11-1) 11.2.0"
+export KBUILD_COMPILER_STRING="$CLANG_VER with gcc (toolchains.bootlin.com) 11.2.0"
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 DATE=$(date "+%B %-d, %Y")
 ZIP_DATE=$(date +"%Y%m%d")
@@ -73,7 +73,7 @@ tg_post_msg() {
 }
 
 # Post Main Information
-tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Triggered by: </b><code>ben863</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Pipelines Host: </b><code>CircleCI</code>%0A<b>Kernel Source: </b>$KERNEL_SOURCE%0A<b>Toolchain Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
+tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Triggered by: </b><code>ben863</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Pipelines Host: </b><code>CircleCI</code>%0A<b>Kernel Source: </b><code>$KERNEL_SOURCE</code>%0A<b>Toolchain Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
 
 # Compile
 compile(){
