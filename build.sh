@@ -29,7 +29,6 @@ git clone --depth=1 https://github.com/cbendot/gcc-armv5.git gcc32
 KERNEL_ROOTDIR=$(pwd)/$DEVICE_CODENAME # IMPORTANT ! Fill with your kernel source root directory.
 DEVICE_DEFCONFIG=$DEVICE_DEFCONFIG # IMPORTANT ! Declare your kernel source defconfig file here.
 CLANG_ROOTDIR=$(pwd)/clang-aosp # IMPORTANT! Put your clang directory here.
-# LLVM_ROOTDIR=$(pwd)/clang-llvm
 GCC64_ROOTDIR=$(pwd)/gcc64
 GCC32_ROOTDIR=$(pwd)/gcc32
 export KBUILD_BUILD_USER=$BUILD_USER # Change with your own name or else.
@@ -37,9 +36,9 @@ export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
 
 # Main Declaration
 CLANG_VER="$("$CLANG_ROOTDIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
-# LLD_VER="$("$CLANG_ROOTDIR"/bin/ld.lld --version | head -n 1)"
+LLD_VER="$("$CLANG_ROOTDIR"/bin/ld.lld --version | head -n 1)"
 # GCC_VER="$("$GCC32_ROOTDIR"/bin/arm-buildroot-linux-gnueabi-gcc --version | head -n 1)"
-export KBUILD_COMPILER_STRING="$CLANG_VER with gcc (toolchains.bootlin.com) 11.2.0"
+export KBUILD_COMPILER_STRING="$CLANG_VER gcc version 11.2.0 with $LLD_VER"
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 DATE=$(date "+%B %-d, %Y")
 ZIP_DATE=$(date +"%Y%m%d")
@@ -125,7 +124,7 @@ error() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 $KERNEL_NAME-EAS-${ZIP_DATE}.zip *
+    zip -r9 [OC]$KERNEL_NAME-EAS-${ZIP_DATE}.zip *
     cd ..
 
 }
