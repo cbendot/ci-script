@@ -78,7 +78,7 @@ tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Triggered by: </b><code>ben863
 compile(){
 cd ${KERNEL_ROOTDIR}
 COMMIT_HEAD=$(git log --oneline -1)
-tg_post_msg "<b>commit:</b> <code>$COMMIT_HEAD</code>"
+tg_post_msg "<b>commit: </b>$COMMIT_HEAD"
 make -j$(nproc) O=out ARCH=arm64 SUBARCH=arm64 ${DEVICE_DEFCONFIG}
 make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
     CC=${CLANG_ROOTDIR}/bin/clang \
