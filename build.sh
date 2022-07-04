@@ -72,7 +72,7 @@ tg_post_msg() {
 }
 
 # Post Main Information
-tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Triggered by: </b><code>ben863</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Pipelines Host: </b><code>CircleCI</code>%0A<b>Kernel Source: </b><code>$KERNEL_SOURCE</code>%0A<b>Toolchain Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
+tg_post_msg "<b>Kernel Compilation Started!</b>%0A<b>Triggered by: </b><code>ben863</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Pipelines Host: </b><code>CircleCI</code>%0A<b>Kernel Source: </b><code>$KERNEL_SOURCE</code>%0A<b>Toolchain Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
 
 # Compile
 compile(){
@@ -124,7 +124,7 @@ error() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 [OC]$KERNEL_NAME-EAS-${ZIP_DATE}.zip *
+    zip -r9 $KERNEL_NAME-EAS-${ZIP_DATE}.zip *
     cd ..
 
 }
