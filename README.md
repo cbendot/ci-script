@@ -1,1 +1,1 @@
-[![CircleCI](https://circleci.com/gh/cbendot/ci-script/tree/ci-clang.svg?style=svg)](https://circleci.com/gh/cbendot/ci-script/tree/ci-clang)
+[![CircleCI](https://circleci.com/gh/cbendot/ci-script/tree/ci-clang.svg?style=svg)](https://circleci.com/gh/cbendot/ci-script/tree/ci-clang) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/cbendot/ci-script)

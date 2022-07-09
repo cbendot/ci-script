@@ -21,7 +21,7 @@ echo "|| Downloading few Dependecies . . .||"
 git clone --depth=1 $KERNEL_SOURCE -b eas $DEVICE_CODENAME
 # git clone --depth=1 https://gitlab.com/ben863/azure-clang clang-llvm # Elastics set as Clang Default
 # git clone --depth=1 https://gitlab.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-r450784.git clang-aosp
-git clone --depth=1 https://gitlab.com/STRK-ND/aosp-clang.git clang-aosp
+git clone --depth=1 https://gitlab.com/ben863/aosp-clang.git clang-aosp
 git clone --depth=1 https://github.com/cbendot/gcc-aarch64.git gcc64
 git clone --depth=1 https://github.com/cbendot/gcc-armv5.git gcc32 
 
@@ -38,7 +38,7 @@ export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
 CLANG_VER="$("$CLANG_ROOTDIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
 LLD_VER="$("$CLANG_ROOTDIR"/bin/ld.lld --version | head -n 1)"
 # GCC_VER="$("$GCC32_ROOTDIR"/bin/arm-buildroot-linux-gnueabi-gcc --version | head -n 1)"
-export KBUILD_COMPILER_STRING="$CLANG_VER with $LLD_VER gcc version 11.2.0"
+export KBUILD_COMPILER_STRING="$CLANG_VER with $LLD_VER"
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 DATE=$(date "+%B %-d, %Y")
 ZIP_DATE=$(date +"%Y%m%d")
