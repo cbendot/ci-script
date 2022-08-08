@@ -17,24 +17,24 @@
 
 echo "|| Downloading few Dependecies . . .||"
 # Kernel Sources
-git clone --depth=1 $KERNEL_SOURCE -b eas $DEVICE_CODENAME
-git clone --depth=1 https://github.com/cbendot/aarch64.git gcc64 # gcc64 set as Default
-git clone --depth=1 https://github.com/cbendot/armv7.git gcc32 # gcc32 set as Default
-# git clone --depth=1 https://github.com/mvaisakh/gcc-arm64.git gcc64
-# git clone --depth=1 https://github.com/mvaisakh/gcc-arm32.git gcc32
+git clone --depth=1 $KERNEL_SOURCE -b msm-4.4-eas $DEVICE_CODENAME
+git clone --depth=1 https://github.com/cbendot/gcc-aarch64.git gcc64 # gcc64 set as Default
+git clone --depth=1 https://github.com/cbendot/gcc-armv5.git gcc32 # gcc32 set as Default
+# git clone --deoth=1 https://github.com/mvaisakh/gcc-arm64.git gcc64 # gcc64 set as Default
+# git clone --depth=1 https://github.com/mvaisakh/gcc-arm.git gcc32 # gcc32 set as Default
 
 # Main Declaration
 KERNEL_ROOTDIR=$(pwd)/$DEVICE_CODENAME # IMPORTANT ! Fill with your kernel source root directory.
 DEVICE_DEFCONFIG=$DEVICE_DEFCONFIG # IMPORTANT ! Declare your kernel source defconfig file here.
+# CLANG_ROOTDIR=$(pwd)/clang
 GCC64_ROOTDIR=$(pwd)/gcc64 # IMPORTANT! Put your GCC directory here.
 GCC32_ROOTDIR=$(pwd)/gcc32 # IMPORTANT! Put your GCC directory here.
-export KBUILD_BUILD_USER=$BUILD_USER # Change with your own name or else.
-export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
+# export KBUILD_BUILD_USER=$BUILD_USER # Change with your own name or else.
+# export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
 
 # Main Declaration
-# 
+# CLANG_VER="$("$CLANG_ROOTDIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
 GCC64_VER="$("$GCC64_ROOTDIR"/bin/aarch64-buildroot-linux-gnu-gcc --version | head -n 1)"
-# GCC64_VER="$("$GCC64_ROOTDIR"/bin/aarch64-elf-gcc --version | head -n 1)"
 export KBUILD_COMPILER_STRING="$GCC64_VER"
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 DATE=$(date "+%B %-d, %Y")
@@ -69,12 +69,13 @@ tg_post_msg() {
 }
 
 # Post Main Information
-tg_post_msg "<b>Building Kernel Started!</b>%0A<b>Triggered by: </b><code>ben863</code>%0A<b>Pipelines Host: </b><code>CircleCI</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Compiler Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
+tg_post_msg "<b>$KERNEL_NAME Triggered Build</b>%0A<b>Triggered by: </b><code>ben863</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Pipelines Hosts: </b><code>CircleCI</code>%0A<b>Source:</b> <code>$KERNEL_SOURCE</code>%0A<b>Toolchain Information:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
 
 # Compile
 compile(){
-tg_post_msg "<b>$KERNEL_NAME: </b>$KERNEL_SOURCE"
 cd ${KERNEL_ROOTDIR}
+COMMIT_HEAD=$(git log --oneline -1)
+tg_post_msg "<b>commit: </b>$COMMIT_HEAD"
 make -j$(nproc) O=out ARCH=arm64 ${DEVICE_DEFCONFIG}
 make -j$(nproc) ARCH=arm64 O=out \
     AR=${GCC64_ROOTDIR}/bin/aarch64-buildroot-linux-gnu-ar \
@@ -83,10 +84,10 @@ make -j$(nproc) ARCH=arm64 O=out \
   	OBJDUMP=${GCC64_ROOTDIR}/bin/aarch64-buildroot-linux-gnu-objdump \
     STRIP=${GCC64_ROOTDIR}/bin/aarch64-buildroot-linux-gnu-strip \
     CROSS_COMPILE=${GCC64_ROOTDIR}/bin/aarch64-buildroot-linux-gnu- \
-    CROSS_COMPILE_ARM32=${GCC32_ROOTDIR}/bin/arm-buildroot-linux-gnueabihf-
+    CROSS_COMPILE_ARM32=${GCC32_ROOTDIR}/bin/arm-buildroot-linux-gnueabi-
 
    if ! [ -a "$IMAGE" ]; then
-	error
+	finerr
 	exit 1
    fi
 
@@ -106,7 +107,7 @@ function push() {
 }
 
 # Fin Error
-error() {
+function finerr() {
     curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
         -d chat_id="$TG_CHAT_ID" \
         -d "disable_web_page_preview=true" \
@@ -118,7 +119,7 @@ error() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 $KERNEL_NAME-${ZIP_DATE}.zip *
+    zip -r9 $KERNEL_NAME-EAS-${ZIP_DATE}.zip *
     cd ..
 
 }
