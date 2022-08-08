@@ -17,11 +17,10 @@
 
 echo "|| Downloading few Dependecies . . .||"
 # Kernel Sources
-git clone --depth=1 $KERNEL_SOURCE -b hmp $DEVICE_CODENAME
-# git clone --depth=1 $KERNEL_SOURCE -b eas $DEVICE_CODENAME
+git clone --depth=1 $KERNEL_SOURCE -b msm-4.4-eas $DEVICE_CODENAME
 # git clone --depth=1 https://gitlab.com/ben863/elastics-clang clang-aosp # Elastics set as Clang Default
-# git clone --depth=1 https://gitlab.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-r450784.git clang-aosp
-git clone --depth=1 https://gitlab.com/ben863/aosp-clang.git clang-aosp
+git clone --depth=1 https://gitlab.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-r445002.git clang-aosp
+# git clone --depth=1 https://gitlab.com/ben863/aosp-clang.git clang-aosp
 git clone --depth=1 https://github.com/cbendot/gcc-aarch64.git gcc64
 git clone --depth=1 https://github.com/cbendot/gcc-armv5.git gcc32 
 
@@ -31,14 +30,15 @@ DEVICE_DEFCONFIG=$DEVICE_DEFCONFIG # IMPORTANT ! Declare your kernel source defc
 CLANG_ROOTDIR=$(pwd)/clang-aosp # IMPORTANT! Put your clang directory here.
 GCC64_ROOTDIR=$(pwd)/gcc64
 GCC32_ROOTDIR=$(pwd)/gcc32
-export KBUILD_BUILD_USER=$BUILD_USER # Change with your own name or else.
-export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
+# export KBUILD_BUILD_USER=$BUILD_USER # Change with your own name or else.
+# export KBUILD_BUILD_HOST=$BUILD_HOST # Change with your own hostname.
 
 # Main Declaration
 CLANG_VER="$("$CLANG_ROOTDIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
 LLD_VER="$("$CLANG_ROOTDIR"/bin/ld.lld --version | head -n 1)"
-# GCC_VER="$("$GCC32_ROOTDIR"/bin/arm-buildroot-linux-gnueabi-gcc --version | head -n 1)"
+# GCC_VER="$("$GCC64_ROOTDIR"/bin/aarch64-buildroot-linux-gnu-gcc --version | head -n 1)"
 export KBUILD_COMPILER_STRING="$CLANG_VER with $LLD_VER"
+# export KBUILD_COMPILER_STRING="$GCC_VER"
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 DATE=$(date "+%B %-d, %Y")
 ZIP_DATE=$(date +"%Y%m%d")
@@ -124,7 +124,7 @@ error() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 [OC]$KERNEL_NAME-HMP-${ZIP_DATE}.zip *
+    zip -r9 $KERNEL_NAME-EAS-${ZIP_DATE}.zip *
     cd ..
 
 }
