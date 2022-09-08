@@ -1,1 +1,1 @@
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/cbendot/ci-script/tree/ci-gcc.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/cbendot/ci-script/tree/ci-gcc) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/cbendot/ci-script)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/cbendot/ci-script/tree/ci-gcc.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/cbendot/ci-script/tree/msm-4.4) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/cbendot/ci-script)
