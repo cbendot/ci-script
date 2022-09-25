@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# Copyright (C) 2021 a xyzprjkt property
+# Copyright (C) 2022 a xyzprjkt property
 #
 
 # Needed Secret Variable
 # KERNEL_NAME | Your kernel name
 # KERNEL_SOURCE | Your kernel link source
-# KERNEL_BRANCH  | Your needed kernel branch if needed with -b. eg -b eleven_eas
+# KERNEL_BRANCH  | Your needed kernel branch if needed with -b. eg -b msm-4.4-eas
 # DEVICE_CODENAME | Your device codename
 # DEVICE_DEFCONFIG | Your device defconfig eg. lavender_defconfig
 # ANYKERNEL | Your Anykernel link repository
@@ -74,7 +74,7 @@ tg_post_msg() {
 }
 
 # Post Main Information
-tg_post_msg "<b>Kernel Compilation Started!</b>%0A<b>Triggered by: </b><code>ben863</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Pipelines Host: </b><code>CircleCI</code>%0A<b>Kernel Source: </b><code>$KERNEL_SOURCE</code>%0A<b>Toolchain Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
+tg_post_msg "<b>Kernel Compilation Started!</b>%0A<b>Triggered by: </b><code>ben863</code>%0A<b>Build For: </b><code>$DEVICE_CODENAME</code>%0A<b>Build Date: </b><code>$DATE</code>%0A<b>Pipelines Host: </b><code>DroneCI</code>%0A<b>Kernel Source: </b><code>$KERNEL_SOURCE</code>%0A<b>Toolchain Info:</b>%0A<code>${KBUILD_COMPILER_STRING}</code>"
 
 # Compile
 compile(){
@@ -92,13 +92,10 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
     CLANG_TRIPLE=${GCC64_ROOTDIR}/aarch64-buildroot-linux-gnu- \
     CROSS_COMPILE=${GCC64_ROOTDIR}/bin/aarch64-buildroot-linux-gnu- \
     CROSS_COMPILE_ARM32=${GCC32_ROOTDIR}/bin/arm-buildroot-linux-gnueabi-
-#    CLANG_TRIPLE=${GCC64_ROOTDIR}/aarch64-linux-gnu- \
-#    CROSS_COMPILE=${GCC64_ROOTDIR}/bin/aarch64-linux-android- \
-#    CROSS_COMPILE_ARM32=${GCC32_ROOTDIR}/bin/arm-linux-androideabi-
 
    if ! [ -a "$IMAGE" ]; then
-	error
-  exit 1
+	finerr
+	exit 1
    fi
 
   git clone --depth=1 $ANYKERNEL -b asus AnyKernel
@@ -117,12 +114,12 @@ function push() {
 }
 
 # Fin Error
-error() {
+function finerr() {
     curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
         -d chat_id="$TG_CHAT_ID" \
         -d "disable_web_page_preview=true" \
         -d "parse_mode=markdown" \
-        -d text="❌ Build throw an error(s)%0A$(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s)"
+        -d text="❌ Build throw an error(s)"
     exit 1
 }
 
